@@ -1,0 +1,182 @@
+<template>
+  <div class="table-container">
+    <vab-query-form>
+      <vab-query-form-left-panel>
+        <el-button icon="el-icon-plus" type="primary" @click="handleAdd">
+          添加
+        </el-button>
+        <el-button icon="el-icon-delete" type="danger" @click="handleDelete">
+          删除
+        </el-button>
+      </vab-query-form-left-panel>
+      <vab-query-form-right-panel>
+        <el-form ref="form" :model="queryForm" :inline="true">
+          <el-form-item>
+            <el-input v-model="queryForm.title" placeholder="请输入关键字" />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              icon="el-icon-search"
+              type="primary"
+              native-type="submit"
+              @click="testNotify"
+            >
+              查询
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </vab-query-form-right-panel>
+    </vab-query-form>
+
+    <el-table
+      ref="tableSort"
+      v-loading="listLoading"
+      :data="list"
+      :element-loading-text="elementLoadingText"
+      :height="height"
+      @selection-change="setSelectRows"
+    >
+      <el-table-column
+        show-overflow-tooltip
+        type="selection"
+        width="55"
+      ></el-table-column>
+      <el-table-column show-overflow-tooltip label="序号" width="95">
+        <template #default="scope">
+          {{ scope.$index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        label="角色编码"
+        prop="code"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        label="角色名"
+        prop="name"
+        sortable
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        label="创建时间"
+        prop="createTime"
+        width="200"
+      ></el-table-column>
+      <el-table-column show-overflow-tooltip label="操作" width="180px">
+        <template #default="{ row }">
+          <el-button type="text" @click="handleEdit(row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      :background="background"
+      :current-page="queryForm.pageNo"
+      :layout="layout"
+      :page-size="queryForm.pageSize"
+      :total="total"
+    ></el-pagination>
+    <table-edit ref="edit"></table-edit>
+  </div>
+</template>
+
+<script>
+  import { list } from '@/api/rbac/role'
+  import TableEdit from './components/RoleTable'
+
+  export default {
+    name: 'RoleTable',
+    components: {
+      TableEdit,
+    },
+    filters: {
+      statusFilter(status) {
+        const statusMap = {
+          published: 'success',
+          draft: 'gray',
+          deleted: 'danger',
+        }
+        return statusMap[status]
+      },
+    },
+    data() {
+      return {
+        imgShow: true,
+        list: [],
+        imageList: [],
+        listLoading: true,
+        layout: 'total, sizes, prev, pager, next, jumper',
+        total: 0,
+        background: true,
+        selectRows: '',
+        elementLoadingText: '正在加载...',
+        queryForm: {
+          pageNo: 1,
+          pageSize: 20,
+          title: '',
+        },
+      }
+    },
+    computed: {
+      height() {
+        return this.$baseTableHeight()
+      },
+    },
+    created() {
+      this.fetchData()
+    },
+    beforeDestroy() {},
+    mounted() {},
+    methods: {
+      async fetchData() {
+        list()
+          .then((resp) => {
+            const data = resp.data
+            this.list = data.records
+            this.total = data.records.length
+            this.listLoading = false
+          })
+          .catch(() => {
+            this.listLoading = false
+          })
+      },
+      handleAdd() {
+        this.$refs['edit'].showEdit()
+      },
+      handleEdit(row) {
+        this.$refs['edit'].showEdit(row)
+      },
+      handleDelete(row) {
+        if (row.id) {
+          this.$baseConfirm('你确定要删除当前项吗', null, async () => {
+            this.$baseNotify(
+              '模拟删除 [' + row.name + '] 成功',
+              '提示',
+              'success'
+            )
+            this.fetchData()
+          })
+        } else {
+          if (this.selectRows.length > 0) {
+            const ids = this.selectRows.map((item) => item.id).join()
+            this.$baseConfirm('你确定要删除选中项吗', null, async () => {
+              this.$baseNotify(
+                '模拟批量删除' + this.selectRows.length + '个用户成功',
+                '提示',
+                'success'
+              )
+              this.fetchData()
+            })
+          } else {
+            this.$baseMessage('未选中任何行', 'error')
+            return false
+          }
+        }
+      },
+      setSelectRows(val) {
+        this.selectRows = val
+      },
+    },
+  }
+</script>
