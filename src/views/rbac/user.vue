@@ -2,10 +2,20 @@
   <div class="table-container">
     <vab-query-form>
       <vab-query-form-left-panel>
-        <el-button icon="el-icon-plus" type="primary" @click="handleAdd">
+        <el-button
+          v-permissions="['sys:user:add']"
+          icon="el-icon-plus"
+          type="primary"
+          @click="handleAdd"
+        >
           添加
         </el-button>
-        <el-button icon="el-icon-delete" type="danger" @click="handleDelete">
+        <el-button
+          v-permissions="['sys:user:delete']"
+          icon="el-icon-delete"
+          type="danger"
+          @click="handleDelete"
+        >
           删除
         </el-button>
       </vab-query-form-left-panel>
@@ -19,7 +29,6 @@
               icon="el-icon-search"
               type="primary"
               native-type="submit"
-              @click="testNotify"
             >
               查询
             </el-button>
@@ -71,30 +80,36 @@
         prop="mobile"
         sortable
       ></el-table-column>
-      <!-- <el-table-column show-overflow-tooltip label="状态">
-        <template #default="{ row }">
-          <el-tooltip
-            :content="row.status"
-            class="item"
-            effect="dark"
-            placement="top-start"
-          >
-            <el-tag :type="row.status | statusFilter">
-              {{ row.status }}
-            </el-tag>
-          </el-tooltip>
-        </template>
-      </el-table-column> -->
+
       <el-table-column
         show-overflow-tooltip
         label="创建时间"
         prop="createTime"
         width="200"
       ></el-table-column>
+      <el-table-column show-overflow-tooltip label="状态">
+        <template #default="{ row }">
+          <el-tag :type="row.status | statusFilter">
+            {{ row.status | statusDisplayNameFilter }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="180px">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(row)">删除</el-button>
+          <div v-if="!row.isDefault">
+            <el-button
+              v-permissions="['sys:user:edit']"
+              type="text"
+              icon="el-icon-edit"
+              @click="handleEdit(row)"
+            ></el-button>
+            <el-button
+              v-permissions="['sys:user:delete']"
+              type="text"
+              icon="el-icon-delete"
+              @click="handleDelete(row)"
+            ></el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -105,12 +120,12 @@
       :page-size="queryForm.pageSize"
       :total="total"
     ></el-pagination>
-    <table-edit ref="edit"></table-edit>
+    <table-edit ref="edit" @fetch-data="fetchData"></table-edit>
   </div>
 </template>
 
 <script>
-  import { list } from '@/api/rbac/user'
+  import { list, deleteUser } from '@/api/rbac/user'
   import TableEdit from './components/UserTable'
 
   export default {
@@ -121,9 +136,17 @@
     filters: {
       statusFilter(status) {
         const statusMap = {
-          published: 'success',
-          draft: 'gray',
-          deleted: 'danger',
+          ENABLED: 'success',
+          DISABLED: 'warning',
+          DELETED: 'danger',
+        }
+        return statusMap[status]
+      },
+      statusDisplayNameFilter(status) {
+        const statusMap = {
+          ENABLED: '可用',
+          DISABLED: '禁用',
+          DELETED: '已删除',
         }
         return statusMap[status]
       },
@@ -178,12 +201,13 @@
       handleDelete(row) {
         if (row.id) {
           this.$baseConfirm('你确定要删除当前项吗', null, async () => {
-            this.$baseNotify(
-              '模拟删除 [' + row.username + '] 成功',
-              '提示',
-              'success'
-            )
-            this.fetchData()
+            let delUids = [row.id]
+            deleteUser(delUids)
+              .then((resp) => {
+                this.$baseNotify(resp.msg, '提示', 'success')
+                this.fetchData()
+              })
+              .catch(() => {})
           })
         } else {
           if (this.selectRows.length > 0) {

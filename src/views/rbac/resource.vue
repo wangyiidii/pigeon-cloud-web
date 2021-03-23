@@ -29,23 +29,24 @@
           :element-loading-text="elementLoadingText"
           row-key="path"
           border
-          default-expand-all
           :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         >
           <el-table-column
             show-overflow-tooltip
             prop="name"
             label="名称/标题"
+            min-width="120px"
           ></el-table-column>
           <el-table-column
             show-overflow-tooltip
             prop="path"
             label="路径"
-            width="200px"
+            width="150px"
           ></el-table-column>
           <el-table-column
             show-overflow-tooltip
             prop="component"
+            width="120px"
             label="vue文件路径"
           ></el-table-column>
           <el-table-column
@@ -83,8 +84,16 @@
           </el-table-column>
           <el-table-column show-overflow-tooltip label="操作" width="200">
             <template #default="{ row }">
-              <el-button type="text" @click="handleEdit(row)">编辑</el-button>
-              <el-button type="text" @click="handleDelete(row)">删除</el-button>
+              <el-button
+                type="text"
+                icon="el-icon-edit"
+                @click="handleEdit(row)"
+              ></el-button>
+              <el-button
+                type="text"
+                icon="el-icon-delete"
+                @click="handleDelete(row)"
+              ></el-button>
             </template>
           </el-table-column>
         </el-table>

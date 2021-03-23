@@ -7,6 +7,30 @@ export function getUserInfo() {
   })
 }
 
+export function createUser(data) {
+  return request({
+    url: '/rbac/user',
+    method: 'post',
+    data,
+  })
+}
+
+export function updateUserInfo(data) {
+  return request({
+    url: '/rbac/user/' + data.id,
+    method: 'put',
+    data,
+  })
+}
+
+export function deleteUser(data) {
+  return request({
+    url: '/rbac/user/delBatch',
+    method: 'delete',
+    data,
+  })
+}
+
 /**
  * 用户路由
  * @returns

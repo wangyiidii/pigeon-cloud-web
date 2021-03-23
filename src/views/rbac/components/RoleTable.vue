@@ -2,7 +2,7 @@
   <el-dialog
     :title="title"
     :visible.sync="dialogFormVisible"
-    width="500px"
+    :width="dialogWidth"
     @close="close"
   >
     <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -24,14 +24,6 @@
           placeholder="请输入角色简介"
         ></el-input>
       </el-form-item>
-      <el-form-item label="菜单" prop="desc">
-        <el-tree
-          :data="resourceTree"
-          :props="defaultProps"
-          show-checkbox
-          @node-click="handleNodeClick"
-        ></el-tree>
-      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
@@ -41,8 +33,7 @@
 </template>
 
 <script>
-  import { doEdit } from '@/api/table'
-  import { resourceTree } from '@/api/rbac/resource'
+  import { createRole, updateRole } from '@/api/rbac/role'
 
   export default {
     name: 'TableEdit',
@@ -54,21 +45,37 @@
             { required: true, trigger: 'blur', message: '请输入角色编码' },
           ],
           name: [{ required: true, trigger: 'blur', message: '请输入用户名' }],
+          desc: [
+            { required: true, trigger: 'blur', message: '请输入角色描述' },
+          ],
         },
         title: '',
         isEdit: false,
         dialogFormVisible: false,
-        resourceTree: [],
-        defaultProps: {
-          children: 'children',
-          label: 'name',
-        },
+        dialogWidth: '500px',
       }
     },
-    created() {},
+    created() {
+      this.setDialogWidth()
+    },
+    mounted() {
+      window.onresize = () => {
+        return (() => {
+          this.setDialogWidth()
+        })()
+      }
+    },
     methods: {
+      setDialogWidth() {
+        var val = document.body.clientWidth
+        const def = 500 // 默认宽度
+        if (val < def) {
+          this.dialogWidth = '90%'
+        } else {
+          this.dialogWidth = def + 'px'
+        }
+      },
       showEdit(row) {
-        this._resourceTree()
         if (!row) {
           this.pwdGroup = true
           this.isEdit = false
@@ -90,23 +97,29 @@
       save() {
         this.$refs['form'].validate(async (valid) => {
           if (valid) {
-            this.$baseMessage('模拟编辑成功', 'success')
-            this.$refs['form'].resetFields()
-            this.dialogFormVisible = false
-            this.$emit('fetch-data')
-            this.form = this.$options.data().form
+            if (this.form.id) {
+              updateRole(this.form)
+                .then((resp) => {
+                  this.$baseNotify(resp.msg, '提示', 'success')
+                  this.dialogFormVisible = false
+                  this.$emit('fetch-data')
+                  this.form = this.$options.data().form
+                })
+                .catch(() => {})
+            } else {
+              createRole(this.form)
+                .then((resp) => {
+                  this.$baseNotify(resp.msg, '提示', 'success')
+                  this.dialogFormVisible = false
+                  this.$emit('fetch-data')
+                  this.form = this.$options.data().form
+                })
+                .catch(() => {})
+            }
           } else {
             return false
           }
         })
-      },
-      _resourceTree() {
-        resourceTree()
-          .then((resp) => {
-            const data = resp.data
-            this.resourceTree = data
-          })
-          .catch(() => {})
       },
     },
   }

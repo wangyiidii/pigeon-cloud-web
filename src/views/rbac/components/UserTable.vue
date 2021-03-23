@@ -2,7 +2,7 @@
   <el-dialog
     :title="title"
     :visible.sync="dialogFormVisible"
-    width="500px"
+    :width="dialogWidth"
     @close="close"
   >
     <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -14,11 +14,11 @@
         ></el-input>
       </el-form-item>
       <el-form-item v-if="pwdGroup" label="密码" prop="password">
-        <el-input v-model.trim="form.username" autocomplete="off"></el-input>
+        <el-input v-model.trim="form.password" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item v-if="pwdGroup" label="确认密码" prop="password">
         <el-input
-          v-model.trim="form.confirmPossword"
+          v-model.trim="form.confirmPassword"
           autocomplete="off"
         ></el-input>
       </el-form-item>
@@ -33,8 +33,9 @@
       </el-form-item>
       <el-form-item label="性别" prop="resource">
         <el-radio-group v-model.trim="form.sex" autocomplete="off">
-          <el-radio-button label="1">男</el-radio-button>
-          <el-radio-button label="2">女</el-radio-button>
+          <el-radio-button label="M">男</el-radio-button>
+          <el-radio-button label="W">女</el-radio-button>
+          <el-radio-button label="N">未知</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="头像" prop="avatar">
@@ -56,16 +57,23 @@
 </template>
 
 <script>
+  import { createUser, updateUserInfo } from '@/api/rbac/user'
   export default {
     name: 'TableEdit',
     data() {
       return {
         form: {
-          sex: 1,
+          sex: 'M',
         },
         rules: {
           username: [
             { required: true, trigger: 'blur', message: '请输入用户名' },
+          ],
+          password: [
+            { required: true, trigger: 'blur', message: '请输入密码' },
+          ],
+          confirmPassword: [
+            { required: true, trigger: 'blur', message: '请输入确认密码' },
           ],
           name: [{ required: true, trigger: 'blur', message: '请输入姓名' }],
         },
@@ -73,10 +81,29 @@
         pwdGroup: false,
         isEdit: false,
         dialogFormVisible: false,
+        dialogWidth: '500px',
       }
     },
-    created() {},
+    created() {
+      this.setDialogWidth()
+    },
+    mounted() {
+      window.onresize = () => {
+        return (() => {
+          this.setDialogWidth()
+        })()
+      }
+    },
     methods: {
+      setDialogWidth() {
+        var val = document.body.clientWidth
+        const def = 500 // 默认宽度
+        if (val < def) {
+          this.dialogWidth = '90%'
+        } else {
+          this.dialogWidth = def + 'px'
+        }
+      },
       showEdit(row) {
         if (!row) {
           this.pwdGroup = true
@@ -99,12 +126,33 @@
       save() {
         this.$refs['form'].validate(async (valid) => {
           if (valid) {
-            // const { msg } = await doEdit(this.form)
-            this.$baseMessage('模拟编辑成功', 'success')
-            this.$refs['form'].resetFields()
-            this.dialogFormVisible = false
-            this.$emit('fetch-data')
-            this.form = this.$options.data().form
+            console.log(this.form.id)
+
+            if (this.form.id) {
+              updateUserInfo(this.form)
+                .then((resp) => {
+                  this.$baseNotify(resp.msg, '提示', 'success')
+                  this.$refs['form'].resetFields()
+                  this.dialogFormVisible = false
+                  this.$emit('fetch-data')
+                  this.form = this.$options.data().form
+                })
+                .catch(() => {
+                  return
+                })
+            } else {
+              createUser(this.form)
+                .then((resp) => {
+                  this.$baseNotify(resp.msg, '提示', 'success')
+                  this.$refs['form'].resetFields()
+                  this.dialogFormVisible = false
+                  this.$emit('fetch-data')
+                  this.form = this.$options.data().form
+                })
+                .catch(() => {
+                  return
+                })
+            }
           } else {
             return false
           }

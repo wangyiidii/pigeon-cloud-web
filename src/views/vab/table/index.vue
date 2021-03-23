@@ -11,7 +11,6 @@
         <el-button type="primary" @click="testMessage">baseMessage</el-button>
         <el-button type="primary" @click="testALert">baseAlert</el-button>
         <el-button type="primary" @click="testConfirm">baseConfirm</el-button>
-        <el-button type="primary" @click="testNotify">baseNotify</el-button>
       </vab-query-form-left-panel>
       <vab-query-form-right-panel>
         <el-form
@@ -254,9 +253,6 @@
             /* 可以写回调; */
           }
         )
-      },
-      testNotify() {
-        this.$baseNotify('测试消息提示', 'test', 'success', 'bottom-right')
       },
     },
   }

@@ -26,7 +26,6 @@
               icon="el-icon-search"
               type="primary"
               native-type="submit"
-              @click="testNotify"
             >
               查询
             </el-button>
@@ -187,9 +186,6 @@
       },
       setSelectRows(val) {
         this.selectRows = val
-      },
-      testNotify() {
-        this.$baseNotify('测试消息提示', 'test', 'success', '')
       },
     },
   }

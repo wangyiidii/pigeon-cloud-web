@@ -19,7 +19,6 @@
               icon="el-icon-search"
               type="primary"
               native-type="submit"
-              @click="testNotify"
             >
               查询
             </el-button>
@@ -63,10 +62,37 @@
         prop="createTime"
         width="200"
       ></el-table-column>
+      <el-table-column show-overflow-tooltip label="状态">
+        <template #default="{ row }">
+          <el-tag :type="row.status | statusFilter">
+            {{ row.status | statusDisplayNameFilter }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="180px">
         <template #default="{ row }">
-          <el-button type="text" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(row)">删除</el-button>
+          <div v-if="!row.isDefault">
+            <el-button
+              type="text"
+              icon="el-icon-edit"
+              @click="handleEdit(row)"
+            ></el-button>
+            <el-button
+              type="text"
+              icon="el-icon-delete"
+              @click="handleDelete(row)"
+            ></el-button>
+            <el-button
+              type="text"
+              icon="el-icon-user"
+              @click="handleRoleUser(row)"
+            ></el-button>
+            <el-button
+              type="text"
+              icon="el-icon-setting"
+              @click="handleResource(row)"
+            ></el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -77,25 +103,39 @@
       :page-size="queryForm.pageSize"
       :total="total"
     ></el-pagination>
-    <table-edit ref="edit"></table-edit>
+    <table-edit ref="edit" @fetch-data="fetchData"></table-edit>
+    <role-resource-edit ref="roleResourceEdit"></role-resource-edit>
+    <role-user ref="roleUserEdit"></role-user>
   </div>
 </template>
 
 <script>
-  import { list } from '@/api/rbac/role'
+  import { list, deleteRole } from '@/api/rbac/role'
   import TableEdit from './components/RoleTable'
+  import RoleResourceEdit from './components/RoleResource'
+  import RoleUser from './components/RoleUser'
 
   export default {
     name: 'RoleTable',
     components: {
       TableEdit,
+      RoleResourceEdit,
+      RoleUser,
     },
     filters: {
       statusFilter(status) {
         const statusMap = {
-          published: 'success',
-          draft: 'gray',
-          deleted: 'danger',
+          ENABLED: 'success',
+          DISABLED: 'warning',
+          DELETED: 'danger',
+        }
+        return statusMap[status]
+      },
+      statusDisplayNameFilter(status) {
+        const statusMap = {
+          ENABLED: '可用',
+          DISABLED: '禁用',
+          DELETED: '已删除',
         }
         return statusMap[status]
       },
@@ -147,15 +187,22 @@
       handleEdit(row) {
         this.$refs['edit'].showEdit(row)
       },
+      handleResource(row) {
+        this.$refs['roleResourceEdit'].showEdit(row)
+      },
+      handleRoleUser(row) {
+        this.$refs['roleUserEdit'].showEdit(row)
+      },
       handleDelete(row) {
         if (row.id) {
           this.$baseConfirm('你确定要删除当前项吗', null, async () => {
-            this.$baseNotify(
-              '模拟删除 [' + row.name + '] 成功',
-              '提示',
-              'success'
-            )
-            this.fetchData()
+            let delRoleIds = [row.id]
+            deleteRole(delRoleIds)
+              .then((resp) => {
+                this.$baseNotify(resp.msg, '提示', 'success')
+                this.fetchData()
+              })
+              .catch(() => {})
           })
         } else {
           if (this.selectRows.length > 0) {

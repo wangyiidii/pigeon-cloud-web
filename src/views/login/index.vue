@@ -50,6 +50,7 @@
               <vab-icon :icon="['fas', 'eye']"></vab-icon>
             </span>
           </el-form-item>
+          <svg-icon slot="prefix" icon-class="github" />
           <el-button
             :loading="loading"
             class="login-btn"

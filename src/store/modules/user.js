@@ -80,11 +80,8 @@ const actions = {
       Vue.prototype.$baseMessage('验证失败，请重新登录...', 'error')
       return false
     }
-    let { resources, username, name, avatar } = data
-    let permissions = []
-    for (let item of resources) {
-      permissions.push(item.code)
-    }
+    let { permissions, username, name, avatar } = data
+    permissions.push('sys:homePage')
 
     if (permissions && username && Array.isArray(permissions)) {
       commit('setPermissions', permissions)
