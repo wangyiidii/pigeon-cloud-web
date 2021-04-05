@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+/**密码登陆 */
 export async function login(data) {
   return request({
     url: '/auth/oauth/token',
@@ -14,6 +15,22 @@ export async function login(data) {
   })
 }
 
+export async function loginBySocial(data) {
+  return request({
+    url: '/auth/oauth/token',
+    method: 'post',
+    params: {
+      client_id: 'system',
+      client_secret: 'system',
+      grant_type: 'social',
+      source: data.source,
+      code: data.code,
+      state: data.state,
+    },
+  })
+}
+
+/**注销登录 */
 export function logout() {
   return request({
     url: '/logout',
@@ -21,6 +38,7 @@ export function logout() {
   })
 }
 
+/**注册 */
 export function register() {
   return request({
     url: '/register',

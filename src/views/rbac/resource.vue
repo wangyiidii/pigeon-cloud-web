@@ -103,7 +103,7 @@
 </template>
 
 <script>
-  import { resourceTree } from '@/api/rbac/resource'
+  import { menuTree } from '@/api/rbac/resource'
   export default {
     data() {
       return {
@@ -124,7 +124,7 @@
         console.log(data)
       },
       async fetchData() {
-        resourceTree()
+        menuTree()
           .then((resp) => {
             const data = resp.data
             this.resourceTree = data

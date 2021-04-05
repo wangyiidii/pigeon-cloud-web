@@ -15,6 +15,7 @@ import store from '@/store'
 import qs from 'qs'
 import router from '@/router'
 import { isArray } from '@/utils/validate'
+import { randomString } from '@/utils/util'
 
 let loadingInstance
 
@@ -52,6 +53,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
+    config.headers['pigeon-trace-id'] = randomString(12, '')
     if (store.getters['user/accessToken']) {
       //config.headers[tokenName] = store.getters['user/accessToken']
       config.headers['Authorization'] =

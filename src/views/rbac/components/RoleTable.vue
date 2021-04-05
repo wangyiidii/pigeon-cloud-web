@@ -16,6 +16,23 @@
       <el-form-item label="角色名" prop="name">
         <el-input v-model.trim="form.name" autocomplete="off"></el-input>
       </el-form-item>
+      <el-form-item label="部门" prop="orgId">
+        <treeselect
+          ref="orgSelectTree"
+          v-model="form.orgId"
+          placeholder="选择部门"
+          :options="orgTree"
+          earchable="searchable"
+          show-count
+          @select="orgTreeSelected"
+        />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-radio-group v-model.trim="form.status" autocomplete="off">
+          <el-radio-button label="ENABLED">启用</el-radio-button>
+          <el-radio-button label="DISABLED">禁用</el-radio-button>
+        </el-radio-group>
+      </el-form-item>
       <el-form-item label="个人简介" prop="desc">
         <el-input
           v-model.trim="form.desc"
@@ -34,9 +51,13 @@
 
 <script>
   import { createRole, updateRole } from '@/api/rbac/role'
+  import { orgTree } from '@/api/rbac/org'
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
   export default {
     name: 'TableEdit',
+    components: { Treeselect },
     data() {
       return {
         form: {},
@@ -48,15 +69,19 @@
           desc: [
             { required: true, trigger: 'blur', message: '请输入角色描述' },
           ],
+          orgId: [{ required: true, trigger: 'blur', message: '请选择部门' }],
         },
         title: '',
         isEdit: false,
         dialogFormVisible: false,
-        dialogWidth: '500px',
+        dialogWidth: '600px',
+        // 组织相关
+        orgTree: [],
       }
     },
     created() {
       this.setDialogWidth()
+      this.fetchOrgTree()
     },
     mounted() {
       window.onresize = () => {
@@ -73,6 +98,23 @@
           this.dialogWidth = '90%'
         } else {
           this.dialogWidth = def + 'px'
+        }
+      },
+      // 组织树
+      async fetchOrgTree() {
+        orgTree()
+          .then((resp) => {
+            this.orgTree = resp.data
+          })
+          .catch(() => {})
+      },
+      orgTreeSelected(data) {
+        let children = data.children
+        if (Boolean(children) && children.length > 0) {
+          this.$baseMessage('aaa', 'warning')
+          delete this.form.orgId
+        } else {
+          this.$baseMessage('bbb', 'success')
         }
       },
       showEdit(row) {

@@ -1,12 +1,12 @@
 <template>
-  <div id="vue-admin-beautiful">
+  <div id="pigeon-web">
     <router-view />
   </div>
 </template>
 
 <script>
   export default {
-    name: 'App',
+    name: 'PigeonWeb',
     mounted() {},
   }
 </script>

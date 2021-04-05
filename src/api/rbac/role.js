@@ -4,7 +4,7 @@ import qs from 'qs'
 export function list(data) {
   return request({
     url: '/rbac/role/list',
-    method: 'get',
+    method: 'post',
     data,
   })
 }
@@ -25,11 +25,6 @@ export function updateRole(data) {
   })
 }
 export function deleteRole(data) {
-  console.log({
-    url: '/rbac/role/delBatch',
-    method: 'delete',
-    data: data,
-  })
   return request({
     url: '/rbac/role/delBatch',
     method: 'delete',
@@ -59,9 +54,16 @@ export function getRoleMenu(rid) {
   })
 }
 
-export function bindMenu(data) {
+export function getRolePermission(rid) {
   return request({
-    url: '/rbac/role/bindMenu',
+    url: '/rbac/role/perms/' + rid,
+    method: 'get',
+  })
+}
+
+export function bindResource(data) {
+  return request({
+    url: '/rbac/role/bindResource',
     method: 'post',
     data,
   })

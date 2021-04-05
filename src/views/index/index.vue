@@ -158,15 +158,6 @@
           <div style="text-align: center">
             <h1 style="font-size: 30px">Pigeon Cloud</h1>
           </div>
-          <div v-for="(item, index) in noticeList" :key="index">
-            <el-alert
-              v-if="index !== 0"
-              :title="item.title"
-              :type="item.type"
-              :closable="item.closable"
-            ></el-alert>
-            <br />
-          </div>
           <el-alert :closable="false" :title="userAgent" type="info"></el-alert>
           <br />
         </el-card>
@@ -197,7 +188,7 @@
           prefix: '',
           suffix: '',
           separator: ',',
-          duration: 8000,
+          duration: 2000,
         },
         config2: {
           startVal: 0,
@@ -206,7 +197,7 @@
           prefix: '',
           suffix: '',
           separator: ',',
-          duration: 8000,
+          duration: 2000,
         },
         config3: {
           startVal: 0,
@@ -215,7 +206,7 @@
           prefix: '',
           suffix: '',
           separator: ',',
-          duration: 8000,
+          duration: 2000,
         },
 
         //访问量
@@ -285,7 +276,7 @@
             },
           ],
         },
-        //词云
+        // 词云
         cy: {
           grid: {
             top: '4%',
@@ -303,17 +294,17 @@
               height: '100%',
               textStyle: {
                 normal: {
-                  color() {
-                    const arr = [
-                      '#1890FF',
-                      '#36CBCB',
-                      '#4ECB73',
-                      '#FBD437',
-                      '#F2637B',
-                      '#975FE5',
-                    ]
-                    let index = Math.floor(Math.random() * arr.length)
-                    return arr[index]
+                  color: function () {
+                    //文字颜色的随机色
+                    return (
+                      'rgb(' +
+                      [
+                        Math.round(Math.random() * 250),
+                        Math.round(Math.random() * 250),
+                        Math.round(Math.random() * 250),
+                      ].join(',') +
+                      ')'
+                    )
                   },
                 },
               },
@@ -399,81 +390,6 @@
             },
           ],
         },
-        //中国地图
-        zgdt: {
-          title: {
-            text: '2099年全国GDP分布',
-            subtext: '数据来自Artemis杜撰',
-          },
-          tooltip: {
-            trigger: 'item',
-          },
-          dataRange: {
-            orient: 'horizontal',
-            min: 0,
-            max: 55000,
-            text: ['高', '低'],
-            splitNumber: 0,
-          },
-          series: [
-            {
-              name: '2099年全国GDP分布',
-              type: 'map',
-              roam: false,
-              zoom: 1.25,
-              mapType: 'china',
-              mapLocation: {
-                x: 'center',
-              },
-              selectedMode: 'multiple',
-              itemStyle: {
-                normal: {
-                  label: {
-                    show: false,
-                  },
-                },
-                emphasis: {
-                  label: {
-                    show: true,
-                  },
-                },
-              },
-              data: [
-                { name: '西藏', value: 605.83 },
-                { name: '青海', value: 1670.44 },
-                { name: '宁夏', value: 2102.21 },
-                { name: '海南', value: 2522.66 },
-                { name: '甘肃', value: 5020.37 },
-                { name: '贵州', value: 5701.84 },
-                { name: '新疆', value: 6610.05 },
-                { name: '云南', value: 8893.12 },
-                { name: '重庆', value: 10011.37 },
-                { name: '吉林', value: 10568.83 },
-                { name: '山西', value: 11237.55 },
-                { name: '天津', value: 11307.28 },
-                { name: '江西', value: 11702.82 },
-                { name: '广西', value: 11720.87 },
-                { name: '陕西', value: 12512.3 },
-                { name: '黑龙江', value: 12582 },
-                { name: '内蒙古', value: 14359.88 },
-                { name: '安徽', value: 15300.65 },
-                { name: '北京', value: 16251.93 },
-                { name: '福建', value: 17560.18 },
-                { name: '上海', value: 19195.69 },
-                { name: '湖北', value: 19632.26 },
-                { name: '湖南', value: 19669.56 },
-                { name: '四川', value: 21026.68 },
-                { name: '辽宁', value: 22226.7 },
-                { name: '河北', value: 24515.76 },
-                { name: '河南', value: 26931.03 },
-                { name: '浙江', value: 32318.85 },
-                { name: '山东', value: 45361.85, selected: true },
-                { name: '江苏', value: 49110.27 },
-                { name: '广东', value: 53210.28 },
-              ],
-            },
-          ],
-        },
 
         //更新日志
         reverse: true,
@@ -481,90 +397,6 @@
         // noticeList: [],
         //其他信息
         userAgent: navigator.userAgent,
-        //卡片图标
-        iconList: [
-          {
-            icon: 'video',
-            title: '视频播放器',
-            link: '',
-            color: '#ffc069',
-          },
-          {
-            icon: 'table',
-            title: '表格',
-            link: '',
-            color: '#5cdbd3',
-          },
-          {
-            icon: 'laptop-code',
-            title: '源码',
-            link: 'https://gitee.com/matevip/artemis',
-            color: '#b37feb',
-          },
-          {
-            icon: 'book',
-            title: '书籍',
-            link: 'https://mate.vip/#/doc',
-            color: '#69c0ff',
-          },
-          {
-            icon: 'bullhorn',
-            title: '公告',
-            link: '',
-            color: '#ff85c0',
-          },
-          {
-            icon: 'gift',
-            title: '礼物',
-            link: '',
-            color: '#ffd666',
-          },
-
-          {
-            icon: 'balance-scale-left',
-            title: '公平的世界',
-            link: '',
-            color: '#ff9c6e',
-          },
-          {
-            icon: 'coffee',
-            title: '休息一下',
-            link: '',
-            color: '#95de64',
-          },
-        ],
-        adList: [
-          {
-            title: 'Artemis 2.2.8版本发布，点我体验',
-            url: 'https://cloud.mate.vip',
-          },
-        ],
-        noticeList: [
-          {
-            title:
-              '温馨提示：Artemis 2.2.8正式发布，采用vue-admin-beautiful模板，基于element ui,为您提供更极致的体验。',
-            closable: false,
-            type: 'success',
-          },
-        ],
-        changeLogList: [
-          {
-            content: '1.5.8版本正式发布',
-            timestamp: '2020-10-31',
-          },
-          {
-            content: '1.6.8版本正式发布',
-            timestamp: '2020-11-10',
-          },
-          {
-            content: '2.0.8版本正式发布',
-            timestamp: '2020-11-27',
-          },
-          {
-            content: '2.2.8版本正式发布',
-            timestamp: '2021-1-16',
-          },
-        ],
       }
     },
     created() {},

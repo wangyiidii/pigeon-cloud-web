@@ -9,7 +9,6 @@ export function list(data) {
 }
 
 export function deleteAttachment(data) {
-  console.log(data)
   return request({
     url: '/file/attachment/' + data.id,
     method: 'delete',

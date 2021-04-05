@@ -7,7 +7,7 @@
     <div style="text-align: center">
       <el-transfer
         v-model="checedkForm.userIdList"
-        style="text-align: left; display: inline-block"
+        style="display: inline-block; text-align: left"
         :titles="['用户列表', '角色']"
         :data="userListLeft"
       ></el-transfer>
@@ -56,14 +56,20 @@
       showEdit(row) {
         this.checedkForm.roleId = row.id
         this.dialogFormVisible = true
+        let param = {
+          pageNo: 1,
+          pageSize: 99999,
+          keyword: '',
+          orgId: row.orgId,
+        }
 
-        userList()
+        userList(param)
           .then((resp) => {
             this.userListLeft = []
             resp.data.records.forEach((u) => {
               this.userListLeft.push({
                 key: u.id,
-                label: u.name,
+                label: u.name + ' (' + u.username + ')',
                 disabled: u.isDefault,
               })
             })

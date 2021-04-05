@@ -209,14 +209,8 @@
         this.imgNum = 0
         this.imgSuccessNum = 0
         this.imgErrorNum = 0
-        /* if ("development" === process.env.NODE_ENV) {
-          this.api = process.env.VUE_APP_BASE_API;
-        } else {
-          this.api = `${window.location.protocol}//${window.location.host}`;
-        }
-
-        this.action = this.api + this.url; */
         this.dialogFormVisible = false
+        this.$emit('fetch-data')
       },
     },
   }

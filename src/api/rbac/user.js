@@ -50,7 +50,7 @@ export function getRouter(data) {
 export function list(data) {
   return request({
     url: '/rbac/user/list',
-    method: 'get',
+    method: 'post',
     data,
   })
 }

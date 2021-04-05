@@ -8,6 +8,7 @@
           name="file"
           :limit="50"
           :size="2"
+          @fetch-data="fetchData"
         ></vab-upload>
         <el-button type="primary" @click="handleShow({ key: 'value' })">
           上传

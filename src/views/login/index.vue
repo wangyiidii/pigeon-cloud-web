@@ -1,322 +1,249 @@
 <template>
   <div class="login-container">
-    <el-row>
-      <el-col :xs="24" :sm="24" :md="12" :lg="16" :xl="16">
-        <div style="color: transparent">占位符</div>
-      </el-col>
-      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
-        <el-form
-          ref="form"
-          :model="form"
-          :rules="rules"
-          class="login-form"
-          label-position="left"
-        >
-          <div class="title">hello !</div>
-          <div class="title-tips">欢迎来到{{ title }}！</div>
-          <el-form-item style="margin-top: 40px" prop="username">
-            <span class="svg-container svg-container-admin">
-              <vab-icon :icon="['fas', 'user']" />
-            </span>
-            <el-input
-              v-model.trim="form.username"
-              v-focus
-              placeholder="请输入用户名"
-              tabindex="1"
-              type="text"
-            />
-          </el-form-item>
-          <el-form-item prop="password">
-            <span class="svg-container">
-              <vab-icon :icon="['fas', 'lock']" />
-            </span>
-            <el-input
-              :key="passwordType"
-              ref="password"
-              v-model.trim="form.password"
-              :type="passwordType"
-              tabindex="2"
-              placeholder="请输入密码"
-              @keyup.enter.native="handleLogin"
-            />
-            <span
-              v-if="passwordType === 'password'"
-              class="show-password"
-              @click="handlePassword"
-            >
-              <vab-icon :icon="['fas', 'eye-slash']"></vab-icon>
-            </span>
-            <span v-else class="show-password" @click="handlePassword">
-              <vab-icon :icon="['fas', 'eye']"></vab-icon>
-            </span>
-          </el-form-item>
-          <svg-icon slot="prefix" icon-class="github" />
-          <el-button
-            :loading="loading"
-            class="login-btn"
-            type="primary"
-            @click="handleLogin"
-          >
-            登录
-          </el-button>
-          <!-- <router-link to="/register">
-            <div style="margin-top: 20px">注册</div>
-          </router-link> -->
-        </el-form>
-      </el-col>
-    </el-row>
+    <div class="login-border">
+      <el-row type="flex">
+        <!-- <el-col :span="12" class="login-left">
+          <img
+            src="@/assets/login_images/matecloud-banner.png"
+            style="height: 485px"
+          />
+        </el-col> -->
+
+        <el-col :span="12">
+          <div class="login-main">
+            <h4 class="title">Pigeon</h4>
+            <el-tabs v-model="activeName" @tab-click="handleClickLoginTabs">
+              <el-tab-pane label="用户密码" name="user">
+                <span slot="label">
+                  <i slot="prefix" class>
+                    <svg-icon icon-class="user" />
+                  </i>
+                  用户密码
+                </span>
+                <userLogin></userLogin>
+              </el-tab-pane>
+              <el-tab-pane label="手机登录" name="mobile">
+                <span slot="label">
+                  <i slot="prefix" class>
+                    <svg-icon icon-class="mobile" />
+                  </i>
+                  手机登录
+                </span>
+              </el-tab-pane>
+            </el-tabs>
+            <div class="third-login">
+              <el-divider>第三方登录</el-divider>
+              <div class="third-way">
+                <span class="third-icon" @click="handleSocial('github')">
+                  <svg-icon slot="prefix" icon-class="github" />
+                </span>
+                <span class="third-icon" @click="handleSocial('gitee')">
+                  <svg-icon
+                    slot="prefix"
+                    icon-class="gitee"
+                    class="el-input__icon login-icon"
+                  />
+                </span>
+                <span class="third-icon" @click="handleSocial()">
+                  <svg-icon
+                    slot="prefix"
+                    icon-class="qq"
+                    class="el-input__icon login-icon"
+                  />
+                </span>
+                <span class="third-icon" @click="handleSocial()">
+                  <svg-icon
+                    slot="prefix"
+                    icon-class="alipay"
+                    class="el-input__icon login-icon"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
 <script>
-  import { isPassword } from '@/utils/validate'
+  import userLogin from './userLogin'
+  import {} from '@/utils/util'
+  import { validatenull } from '@/utils/validate'
+  import { baseURL } from '@/config'
 
   export default {
-    name: 'Login',
-    directives: {
-      focus: {
-        inserted(el) {
-          el.querySelector('input').focus()
-        },
-      },
+    name: 'ArtemisLogin',
+
+    components: {
+      userLogin,
     },
     data() {
-      const validateusername = (rule, value, callback) => {
-        if ('' == value) {
-          callback(new Error('用户名不能为空'))
-        } else {
-          callback()
-        }
-      }
-      const validatePassword = (rule, value, callback) => {
-        if (!isPassword(value)) {
-          callback(new Error('密码不能少于6位'))
-        } else {
-          callback()
-        }
-      }
       return {
-        nodeEnv: process.env.NODE_ENV,
-        title: this.$baseTitle,
-        form: {
-          username: '',
-          password: '',
-        },
-        rules: {
-          username: [
-            {
-              required: true,
-              trigger: 'blur',
-              validator: validateusername,
-            },
-          ],
-          password: [
-            {
-              required: true,
-              trigger: 'blur',
-              validator: validatePassword,
-            },
-          ],
-        },
-        loading: false,
-        passwordType: 'password',
-        redirect: undefined,
+        activeName: 'user',
+        lastActiveName: 'user',
+        loginForm: {},
       }
     },
-    watch: {
-      $route: {
-        handler(route) {
-          this.redirect = (route.query && route.query.redirect) || '/'
-        },
-        immediate: true,
-      },
-    },
-    created() {
-      document.body.style.overflow = 'hidden'
-    },
-    beforeDestroy() {
-      document.body.style.overflow = 'auto'
-    },
-    mounted() {
-      this.form.username = 'wangyidi'
-      this.form.password = '123456'
-      // setTimeout(() => {
-      //   this.handleLogin()
-      // }, 3000)
+    computed: {},
+    watch: {},
+    created: function () {
+      this.handleSocialCallback()
     },
     methods: {
-      handlePassword() {
-        this.passwordType === 'password'
-          ? (this.passwordType = '')
-          : (this.passwordType = 'password')
-        this.$nextTick(() => {
-          this.$refs.password.focus()
-        })
+      handleClickLoginTabs(tab, event) {
+        if (tab.name != 'user') {
+          this.$nextTick(() => {
+            this.activeName = this.lastActiveName
+            this.$message.info('敬请期待')
+          })
+
+          return
+        }
+        lastActiveName = this.activeName
       },
-      handleLogin() {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            this.loading = true
-            this.$store
-              .dispatch('user/login', this.form)
-              .then(() => {
-                const routerPath =
-                  this.redirect === '/404' || this.redirect === '/401'
-                    ? '/'
-                    : this.redirect
-                this.$router.push(routerPath).catch(() => {})
-                this.loading = false
-              })
-              .catch(() => {
-                this.loading = false
-              })
-          } else {
-            return false
-          }
-        })
+      handleSocial(type) {
+        if (type) {
+          window.location.href = baseURL + 'auth/oauth/render/' + type
+        } else {
+          this.$message.info('敬请期待')
+        }
+      },
+      handleSocialCallback() {
+        const params = this.$route.query
+        if (
+          validatenull(params.source) &&
+          validatenull(params.state) &&
+          validatenull(params.code)
+        ) {
+          return
+        } else {
+          this.loginForm.source = params.source
+          this.loginForm.code = params.code
+          this.loginForm.state = params.state
+          this.loading = true
+          this.$store
+            .dispatch('user/loginBsocial', this.loginForm)
+            .then(() => {
+              this.$router.push({ path: this.redirect || '/' })
+              this.loading = false
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        }
       },
     },
   }
 </script>
 
-<style lang="scss" scoped>
+<style rel="stylesheet/scss" lang="scss">
   .login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 100vh;
-    background: url('~@/assets/login_images/background.jpg') center center fixed
-      no-repeat;
-    background-size: cover;
+    //background: url('~@/assets/login_images/background.svg');
+    background-color: #f0f2f5;
+  }
 
-    .title {
-      font-size: 54px;
-      font-weight: 500;
-      color: rgba(14, 18, 26, 1);
+  @media screen and (max-width: 768px) {
+    .login-left {
+      display: none;
     }
-
-    .title-tips {
-      margin-top: 29px;
-      font-size: 26px;
-      font-weight: 400;
-      color: rgba(14, 18, 26, 1);
-      text-overflow: ellipsis;
-      white-space: nowrap;
+  }
+  .login-left {
+    & img {
+      float: right;
     }
+  }
+  .login-main {
+    width: 323px;
+    height: 455px;
+    padding: 25px 25px 5px 25px;
+    background: #ffffff;
+    // border-radius: 6px;
+  }
 
-    .login-btn {
-      display: inherit;
-      width: 220px;
-      height: 60px;
-      margin-top: 5px;
-      border: 0;
+  .title {
+    margin: 10px auto 40px auto;
+    font-size: 24px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.85);
+    text-align: center;
+  }
 
-      &:hover {
-        opacity: 0.9;
+  .login-form {
+    .el-input {
+      height: 38px;
+      input {
+        height: 38px;
       }
     }
 
-    .login-form {
-      position: relative;
-      max-width: 100%;
-      margin: calc((100vh - 425px) / 2) 10% 10%;
-      overflow: hidden;
+    .input-icon {
+      width: 14px;
+      height: 39px;
+      margin-left: 2px;
+    }
+  }
 
-      .forget-password {
-        width: 100%;
-        margin-top: 40px;
-        text-align: left;
+  .login-tip {
+    font-size: 13px;
+    color: #bfbfbf;
+    text-align: center;
+  }
 
-        .forget-pass {
-          width: 129px;
-          height: 19px;
-          font-size: 20px;
-          font-weight: 400;
-          color: rgba(92, 102, 240, 1);
-        }
+  .login-footer {
+    position: fixed;
+    bottom: 1rem;
+    width: 100%;
+    height: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1rem;
+    color: #2c3e50;
+    text-align: center;
+  }
+
+  .tips {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #fff;
+
+    span {
+      &:first-of-type {
+        margin-right: 16px;
       }
     }
+  }
 
-    .tips {
-      margin-bottom: 10px;
-      font-size: $base-font-size-default;
-      color: $base-color-white;
+  .third-login {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 10px 0 30px 0;
+    vertical-align: middle;
 
-      span {
-        &:first-of-type {
-          margin-right: 16px;
-        }
-      }
-    }
-
-    .title-container {
-      position: relative;
-
-      .title {
-        margin: 0 auto 40px auto;
-        font-size: 34px;
-        font-weight: bold;
-        color: $base-color-blue;
-        text-align: center;
-      }
-    }
-
-    .svg-container {
-      position: absolute;
-      top: 14px;
-      left: 15px;
-      z-index: $base-z-index;
-      font-size: 16px;
-      color: #d7dee3;
+    & .third-icon {
+      margin: 0 20px;
       cursor: pointer;
-      user-select: none;
-    }
-
-    .show-password {
-      position: absolute;
-      top: 14px;
-      right: 25px;
-      font-size: 16px;
-      color: #d7dee3;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    ::v-deep {
-      .el-form-item {
-        padding-right: 0;
-        margin: 20px 0;
-        color: #454545;
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: 2px;
-
-        &__content {
-          min-height: $base-input-height;
-          line-height: $base-input-height;
-        }
-
-        &__error {
-          position: absolute;
-          top: 100%;
-          left: 18px;
-          font-size: $base-font-size-small;
-          line-height: 18px;
-          color: $base-color-red;
-        }
-      }
-
-      .el-input {
-        box-sizing: border-box;
-
-        input {
-          height: 58px;
-          padding-left: 45px;
-          font-size: $base-font-size-default;
-          line-height: 58px;
-          color: $base-font-color;
-          background: #f6f4fc;
-          border: 0;
-          caret-color: $base-font-color;
-        }
+      fill: rgba(0, 0, 0, 0.2);
+      & .svg-icon {
+        width: 32px;
+        height: 32px;
       }
     }
+  }
+
+  .third-way {
+    display: flex;
+    justify-content: center;
+    width: 323px;
+  }
+
+  .third-icon:hover {
+    fill: rebeccapurple;
   }
 </style>

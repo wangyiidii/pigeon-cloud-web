@@ -4,7 +4,7 @@
  */
 
 import Vue from 'vue'
-import { login, logout } from '@/api/user'
+import { login, loginBySocial, logout } from '@/api/user'
 import { getUserInfo } from '@/api/rbac/user'
 import {
   getAccessToken,
@@ -74,6 +74,31 @@ const actions = {
       )
     }
   },
+
+  async loginBsocial({ commit }, userInfo) {
+    const { data } = await loginBySocial(userInfo)
+    const accessToken = data[tokenName]
+    if (accessToken) {
+      commit('setAccessToken', accessToken)
+      const hour = new Date().getHours()
+      const thisTime =
+        hour < 8
+          ? '早上好'
+          : hour <= 11
+          ? '上午好'
+          : hour <= 13
+          ? '中午好'
+          : hour < 18
+          ? '下午好'
+          : '晚上好'
+      Vue.prototype.$baseNotify(`欢迎登录${title}`, `${thisTime}！`)
+    } else {
+      Vue.prototype.$baseMessage(
+        `登录接口异常，未正确返回${tokenName}...`,
+        'error'
+      )
+    }
+  },
   async getUserInfo({ commit, state }) {
     const { data } = await getUserInfo(state.accessToken)
     if (!data) {
@@ -95,7 +120,7 @@ const actions = {
     }
   },
   async logout({ dispatch }) {
-    await logout(state.accessToken)
+    // await logout(state.accessToken)
     await dispatch('resetAccessToken')
     await resetRouter()
   },
